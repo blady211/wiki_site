@@ -1,5 +1,5 @@
 
-# 📄 PAGE 2 — Windows Server & Active Directory Security & Authentication
+## 📄 PAGE 2 — Windows Server & Active Directory Security & Authentication
 
 # 🔐 Authentication in Active Directory
 
@@ -7,7 +7,7 @@ Active Directory uses authentication protocols and identity mechanisms to verify
 
 ---
 
-# 🔥 Kerberos
+# 🔥 Kerberos#
 
 **EN:**
 Kerberos is the default authentication protocol in Active Directory. It uses tickets instead of sending passwords over the network.
