@@ -1,27 +1,24 @@
-Poniżej masz **ten sam tekst**, bez zmiany treści — dodałem jedynie uporządkowaną strukturę Markdown (spis treści + kotwice + logiczne nagłówki), żebyś mógł łatwo nawigować w swojej Wiki.
-
----
 
 # Projekt: Platforma aplikacyjna na Kubernetes (Lab LAN)
 
 ## 📑 Spis treści
 
-* [1. Cel projektu](#1-cel-projektu)
-* [2. Architektura środowiska](#2-architektura-środowiska)
-* [3. Etap 1 – Kontenery i prywatny registry](#3-etap-1--kontenery-i-prywatny-registry)
-* [4. Etap 2 – Deployment (Desired State)](#4-etap-2--deployment-desired-state)
-* [5. Etap 3 – Service (L4)](#5-etap-3--service-l4)
-* [6. Etap 4 – MetalLB (LoadBalancer w LAN)](#6-etap-4--metallb-loadbalancer-w-lan)
-* [7. Etap 5 – Ingress (L7)](#7-etap-5--ingress-l7)
-* [8. Pełny przepływ ruchu](#8-pełny-przepływ-ruchu)
-* [9. Kubernetes Networking – teoria w skrócie](#9-kubernetes-networking--teoria-w-skrócie)
-* [10. Decyzje inżynierskie](#10-decyzje-inżynierskie)
-* [11. Co osiągnąłeś](#11-co-osiągnąłeś)
-* [12. CV Summary](#12-cv-summary)
+* [Cel projektu](#cel-projektu)
+* [Architektura środowiska](#architektura-środowiska)
+* [Etap 1 – Kontenery i prywatny registry](#etap-1--kontenery-i-prywatny-registry)
+* [Etap 2 – Deployment (Desired State)](#etap-2--deployment-desired-state)
+* [Etap 3 – Service (L4)](#etap-3--service-l4)
+* [Etap 4 – MetalLB (LoadBalancer w LAN)](#etap-4--metallb-loadbalancer-w-lan)
+* [Etap 5 – Ingress (L7)](#etap-5--ingress-l7)
+* [Pełny przepływ ruchu](#pełny-przepływ-ruchu)
+* [Kubernetes Networking – teoria w skrócie](#kubernetes-networking--teoria-w-skrócie)
+* [Decyzje inżynierskie](#decyzje-inżynierskie)
+* [Co osiągnąłeś](#co-osiągnąłeś)
+* [CV Summary](#cv-summary)
 
 ---
 
-## 1. Cel projektu
+## Cel projektu
 
 Celem projektu było zbudowanie kompletnej platformy do uruchamiania aplikacji web w Kubernetes — symulującej środowisko chmurowe w warunkach on-prem (LAN).
 
@@ -37,7 +34,7 @@ Nie był to projekt „Hello World”, lecz budowa pełnego runtime dla aplikacj
 
 ---
 
-## 2. Architektura środowiska
+## Architektura środowiska
 
 ### Finalny układ
 
@@ -46,12 +43,12 @@ Nie był to projekt „Hello World”, lecz budowa pełnego runtime dla aplikacj
 * ubuntu-node1 → worker
 * rocky-registry → prywatny registry
 
-Sieć LAN: `192.168.0.0/24`
-MetalLB IP pool: `192.168.0.240–250`
+**Sieć LAN:** `192.168.0.0/24`
+**MetalLB IP pool:** `192.168.0.240–250`
 
 ---
 
-## 3. Etap 1 – Kontenery i prywatny registry
+## Etap 1 – Kontenery i prywatny registry
 
 ### Co zrobiliśmy
 
@@ -79,13 +76,11 @@ Obraz:
 * zawiera kod aplikacji
 * jest deployowany wielokrotnie
 
-Zasada:
-
 > Build once, run many times.
 
 ---
 
-## 4. Etap 2 – Deployment (Desired State)
+## Etap 2 – Deployment (Desired State)
 
 ### deployment.yaml
 
@@ -128,7 +123,7 @@ System sam utrzymuje ten stan.
 
 ---
 
-## 5. Etap 3 – Service (L4)
+## Etap 3 – Service (L4)
 
 ### service.yaml
 
@@ -164,7 +159,7 @@ Przekazuje ruch na poziomie portów.
 
 ---
 
-## 6. Etap 4 – MetalLB (LoadBalancer w LAN)
+## Etap 4 – MetalLB (LoadBalancer w LAN)
 
 ### Problem
 
@@ -210,7 +205,7 @@ To jest warstwa L4.
 
 ---
 
-## 7. Etap 5 – Ingress (L7)
+## Etap 5 – Ingress (L7)
 
 ### Instalacja ingress-nginx
 
@@ -243,12 +238,11 @@ spec:
 ```
 
 Efekt:
-Wejście przez nazwę hosta:
 `http://app.lab.local`
 
 ---
 
-## 8. Pełny przepływ ruchu
+## Pełny przepływ ruchu
 
 ### Diagram
 
@@ -271,9 +265,9 @@ Service (ClusterIP L4)
 
 ---
 
-## 9. Kubernetes Networking – teoria w skrócie
+## Kubernetes Networking – teoria w skrócie
 
-### 1. Pod Network
+### Pod Network
 
 Każdy pod:
 
@@ -287,7 +281,7 @@ CNI (u Ciebie Calico):
 
 ---
 
-### 2. Service Network
+### Service Network
 
 Service:
 
@@ -299,7 +293,7 @@ Service działa w oparciu o iptables / IPVS.
 
 ---
 
-### 3. LoadBalancer (MetalLB)
+### LoadBalancer (MetalLB)
 
 * działa poza klastrem
 * ogłasza IP w LAN
@@ -307,7 +301,7 @@ Service działa w oparciu o iptables / IPVS.
 
 ---
 
-### 4. Ingress (L7)
+### Ingress (L7)
 
 Ingress:
 
@@ -330,7 +324,7 @@ Masz pełny stack sieciowy.
 
 ---
 
-## 10. Decyzje inżynierskie
+## Decyzje inżynierskie
 
 Podczas projektu:
 
@@ -339,13 +333,11 @@ Podczas projektu:
 * zostawiliśmy 2 Ubuntu workerów
 * ograniczyliśmy zmienne
 
-Wniosek:
-
 > Stabilność środowiska jest ważniejsza niż różnorodność systemów.
 
 ---
 
-## 11. Co osiągnąłeś
+## Co osiągnąłeś
 
 Po tym projekcie rozumiesz:
 
@@ -361,7 +353,7 @@ To jest poziom junior platform engineer / DevOps.
 
 ---
 
-## 12. CV Summary
+## CV Summary
 
 ### Wersja techniczna
 
@@ -374,10 +366,4 @@ To jest poziom junior platform engineer / DevOps.
 > Built a Kubernetes-based application runtime platform including Deployment, Service, MetalLB LoadBalancer and nginx Ingress with host-based routing in a multi-node cluster.
 
 ---
-
-Jeśli chcesz, mogę teraz:
-
-* zrobić wersję „enterprise-style wiki” (bardziej formalna dokumentacja),
-* rozbić to na osobne pliki `.md`,
-* albo przygotować wersję pod GitHub README.
 
