@@ -3,22 +3,22 @@
 
 ## 📑 Spis treści
 
-* [Cel projektu](#cel-projektu)
-* [Architektura środowiska](#architektura-środowiska)
-* [Etap 1 – Kontenery i prywatny registry](#etap-1--kontenery-i-prywatny-registry)
-* [Etap 2 – Deployment (Desired State)](#etap-2--deployment-desired-state)
-* [Etap 3 – Service (L4)](#etap-3--service-l4)
-* [Etap 4 – MetalLB (LoadBalancer w LAN)](#etap-4--metallb-loadbalancer-w-lan)
-* [Etap 5 – Ingress (L7)](#etap-5--ingress-l7)
-* [Pełny przepływ ruchu](#pełny-przepływ-ruchu)
-* [Kubernetes Networking – teoria w skrócie](#kubernetes-networking--teoria-w-skrócie)
-* [Decyzje inżynierskie](#decyzje-inżynierskie)
-* [Co osiągnąłeś](#co-osiągnąłeś)
-* [CV Summary](#cv-summary)
+* [1️⃣ Cel projektu](#1️⃣-cel-projektu)
+* [2️⃣ Architektura środowiska](#2️⃣-architektura-środowiska)
+* [3️⃣ Etap 1 – Kontenery i prywatny registry](#3️⃣-etap-1--kontenery-i-prywatny-registry)
+* [4️⃣ Etap 2 – Deployment (Desired State)](#4️⃣-etap-2--deployment-desired-state)
+* [5️⃣ Etap 3 – Service (L4)](#5️⃣-etap-3--service-l4)
+* [6️⃣ Etap 4 – MetalLB (LoadBalancer w LAN)](#6️⃣-etap-4--metallb-loadbalancer-w-lan)
+* [7️⃣ Etap 5 – Ingress (L7)](#7️⃣-etap-5--ingress-l7)
+* [8️⃣ Pełny przepływ ruchu](#8️⃣-pełny-przepływ-ruchu)
+* [9️⃣ Kubernetes Networking – teoria w skrócie](#9️⃣-kubernetes-networking--teoria-w-skrócie)
+* [🔟 Decyzje inżynierskie](#🔟-decyzje-inżynierskie)
+* [1️⃣1️⃣ Co osiągnąłeś](#1️⃣1️⃣-co-osiągnąłeś)
+* [1️⃣2️⃣ CV Summary](#1️⃣2️⃣-cv-summary)
 
 ---
 
-## Cel projektu
+## 1️⃣ Cel projektu
 
 Celem projektu było zbudowanie kompletnej platformy do uruchamiania aplikacji web w Kubernetes — symulującej środowisko chmurowe w warunkach on-prem (LAN).
 
@@ -34,7 +34,7 @@ Nie był to projekt „Hello World”, lecz budowa pełnego runtime dla aplikacj
 
 ---
 
-## Architektura środowiska
+## 2️⃣ Architektura środowiska
 
 ### Finalny układ
 
@@ -43,12 +43,12 @@ Nie był to projekt „Hello World”, lecz budowa pełnego runtime dla aplikacj
 * ubuntu-node1 → worker
 * rocky-registry → prywatny registry
 
-**Sieć LAN:** `192.168.0.0/24`
-**MetalLB IP pool:** `192.168.0.240–250`
+Sieć LAN: `192.168.0.0/24`
+MetalLB IP pool: `192.168.0.240–250`
 
 ---
 
-## Etap 1 – Kontenery i prywatny registry
+## 3️⃣ Etap 1 – Kontenery i prywatny registry
 
 ### Co zrobiliśmy
 
@@ -80,7 +80,7 @@ Obraz:
 
 ---
 
-## Etap 2 – Deployment (Desired State)
+## 4️⃣ Etap 2 – Deployment (Desired State)
 
 ### deployment.yaml
 
@@ -123,7 +123,7 @@ System sam utrzymuje ten stan.
 
 ---
 
-## Etap 3 – Service (L4)
+## 5️⃣ Etap 3 – Service (L4)
 
 ### service.yaml
 
@@ -159,7 +159,7 @@ Przekazuje ruch na poziomie portów.
 
 ---
 
-## Etap 4 – MetalLB (LoadBalancer w LAN)
+## 6️⃣ Etap 4 – MetalLB (LoadBalancer w LAN)
 
 ### Problem
 
@@ -205,7 +205,7 @@ To jest warstwa L4.
 
 ---
 
-## Etap 5 – Ingress (L7)
+## 7️⃣ Etap 5 – Ingress (L7)
 
 ### Instalacja ingress-nginx
 
@@ -242,7 +242,7 @@ Efekt:
 
 ---
 
-## Pełny przepływ ruchu
+## 8️⃣ Pełny przepływ ruchu
 
 ### Diagram
 
@@ -265,9 +265,9 @@ Service (ClusterIP L4)
 
 ---
 
-## Kubernetes Networking – teoria w skrócie
+## 9️⃣ Kubernetes Networking – teoria w skrócie
 
-### Pod Network
+### 1️⃣ Pod Network
 
 Każdy pod:
 
@@ -281,7 +281,7 @@ CNI (u Ciebie Calico):
 
 ---
 
-### Service Network
+### 2️⃣ Service Network
 
 Service:
 
@@ -293,7 +293,7 @@ Service działa w oparciu o iptables / IPVS.
 
 ---
 
-### LoadBalancer (MetalLB)
+### 3️⃣ LoadBalancer (MetalLB)
 
 * działa poza klastrem
 * ogłasza IP w LAN
@@ -301,7 +301,7 @@ Service działa w oparciu o iptables / IPVS.
 
 ---
 
-### Ingress (L7)
+### 4️⃣ Ingress (L7)
 
 Ingress:
 
@@ -314,17 +314,7 @@ Ingress:
 
 ---
 
-### Warstwy OSI
-
-* MetalLB → L2/L4
-* Service → L4
-* Ingress → L7
-
-Masz pełny stack sieciowy.
-
----
-
-## Decyzje inżynierskie
+## 🔟 Decyzje inżynierskie
 
 Podczas projektu:
 
@@ -337,7 +327,7 @@ Podczas projektu:
 
 ---
 
-## Co osiągnąłeś
+## 1️⃣1️⃣ Co osiągnąłeś
 
 Po tym projekcie rozumiesz:
 
@@ -353,7 +343,7 @@ To jest poziom junior platform engineer / DevOps.
 
 ---
 
-## CV Summary
+## 1️⃣2️⃣ CV Summary
 
 ### Wersja techniczna
 
