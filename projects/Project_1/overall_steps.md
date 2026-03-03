@@ -1,14 +1,133 @@
+
+# PROJEKTY
+
+Czyli:
+👉 platforma do uruchamiania aplikacji
+👉 monitoring
+👉 CI/CD
+👉 deploy pipeline
+👉 dostęp do usług
+
+---
+
+# 1️⃣ 3 przykłady projektów platformowych (dla Ciebie idealne)
+
+## 1️⃣ Projekt 1 — Platforma aplikacyjna na K8s
+
+### Co to:
+
+* aplikacja w kontenerze
+* deployment
+* service
+* ingress
+* TLS
+* config
+* scaling
+
+Czyli pełny runtime.
+
+### Technicznie:
+
+* Dockerfile
+* Kubernetes manifests
+* Helm chart
+* Ingress + cert-manager
+
+### Efekt:
+
+„Platforma do uruchamiania aplikacji web na Kubernetes”
+
+---
+
+## 2️⃣ Projekt 2 — Monitoring klastra
+
+### Co to:
+
+* Prometheus
+* Grafana
+* metryki node/pod
+* dashboard
+* alert
+
+### Technicznie:
+
+* kube-prometheus-stack (Helm)
+* dashboard
+* alert rule
+
+### Efekt:
+
+„Monitoring Kubernetes cluster z alertami”
+
+---
+
+## 3️⃣ Projekt 3 — CI/CD do K8s
+
+### Co to:
+
+* repo aplikacji
+* build image
+* push registry
+* deploy do K8s
+
+### Technicznie:
+
+* GitHub Actions / GitLab CI
+* docker build
+* kubectl apply / helm upgrade
+
+### Efekt:
+
+„Pipeline deployujący aplikację do Kubernetes”
+
+---
+
+# 2️⃣ Dlaczego to działa w CV
+
+Rekruter widzi:
+
+✔ Docker
+✔ Kubernetes
+✔ Helm
+✔ CI/CD
+✔ monitoring
+
+Czyli DevOps.
+
+---
+
+Krótka odpowiedź: **zaczynamy już projekt 1 i uczymy się K8s w jego trakcie.**
+To najefektywniejsza ścieżka przy Twoim profilu (Linux/Ansible/containers).
+Projekt 1 pokryje ~70% podstaw Kubernetes wymaganych na start.
+
+Poniżej masz **pełny plan: start → realizacja → zakończenie**, w kolejności nauki.
+
+---
+
+# 3️⃣ Czy najpierw nauka K8s czy projekt?
+
+Dla Ciebie właściwa kolejność:
+
+1. minimalne podstawy (2–3 dni)
+2. projekt runtime (główna nauka)
+3. utrwalenie + CV
+
+Nie robimy „teorii K8s miesiącami”.
+Uczysz się przez budowę platformy.
+
+---
+
 # 4️⃣ Projekt 1 — plan krok po kroku
 
 ---
 
-## 4️⃣0️⃣ ETAP 0 — środowisko (start projektu)
+## 4️⃣ ETAP 0 — środowisko (start projektu)
 
 Cel
 
 Mieć lokalny klaster i narzędzia.
 
-Cel
+Kroki
 
 1. Zainstaluj:
 
@@ -33,13 +152,13 @@ Umiejętności
 
 ---
 
-## 4️⃣1️⃣ ETAP 1 — aplikacja w kontenerze
+## 5️⃣ ETAP 1 — aplikacja w kontenerze
 
 Cel
 
 Mieć prostą aplikację web.
 
-Cel
+Kroki
 
 1. Prosta aplikacja:
 
@@ -62,13 +181,13 @@ Umiejętności
 
 ---
 
-## 4️⃣2️⃣ ETAP 2 — Deployment (pierwszy K8s runtime)
+## 6️⃣ ETAP 2 — Deployment (pierwszy K8s runtime)
 
 Cel
 
 Uruchomić aplikację w K8s.
 
-Cel
+Kroki
 
 1. deployment.yaml
 2. kubectl apply
@@ -85,13 +204,13 @@ Nauka K8s
 
 ---
 
-## 4️⃣3️⃣ ETAP 3 — Service (sieć w klastrze)
+## 7️⃣ ETAP 3 — Service (sieć w klastrze)
 
 Cel
 
 Umożliwić dostęp do aplikacji.
 
-Cel
+Kroki
 
 1. service.yaml
 2. ClusterIP
@@ -106,13 +225,13 @@ Nauka
 
 ---
 
-## 4️⃣4️⃣ ETAP 4 — Ingress (dostęp z zewnątrz)
+## 8️⃣ ETAP 4 — Ingress (dostęp z zewnątrz)
 
 Cel
 
 Wejście HTTP do aplikacji.
 
-Cel
+Kroki
 
 1. install ingress controller
 2. ingress.yaml
@@ -127,13 +246,13 @@ Nauka
 
 ---
 
-## 4️⃣5️⃣ ETAP 5 — Config + Secret
+## 9️⃣ ETAP 5 — Config + Secret
 
 Cel
 
 Konfiguracja runtime.
 
-Cel
+Kroki
 
 1. configmap.yaml
 2. secret.yaml
@@ -147,13 +266,13 @@ Nauka
 
 ---
 
-## 4️⃣6️⃣ ETAP 6 — TLS (cert-manager)
+## 🔟 ETAP 6 — TLS (cert-manager)
 
 Cel
 
 HTTPS.
 
-Cel
+Kroki
 
 1. install cert-manager
 2. clusterissuer
@@ -167,13 +286,13 @@ Nauka
 
 ---
 
-## 4️⃣7️⃣ ETAP 7 — Scaling (HPA)
+## 1️⃣1️⃣ ETAP 7 — Scaling (HPA)
 
 Cel
 
 Autoscaling aplikacji.
 
-Cel
+Kroki
 
 1. metrics-server
 2. hpa.yaml
@@ -187,13 +306,13 @@ Nauka
 
 ---
 
-## 4️⃣8️⃣ ETAP 8 — Helm (final platform)
+## 1️⃣2️⃣ ETAP 8 — Helm (final platform)
 
 Cel
 
 Zamienić runtime w chart.
 
-Cel
+Kroki
 
 1. helm create
 2. przenieś manifests
@@ -209,7 +328,7 @@ Nauka
 
 ---
 
-## 4️⃣9️⃣ ETAP 9 — Zakończenie projektu
+## 1️⃣3️⃣ ETAP 9 — Zakończenie projektu
 
 Gotowe repo:
 
@@ -235,7 +354,7 @@ README:
 
 ---
 
-# 5️⃣ Co osiągasz po projekcie
+# 1️⃣4️⃣ Co osiągasz po projekcie
 
 Realnie umiesz:
 
@@ -247,3 +366,22 @@ Realnie umiesz:
 * Helm
 
 To = junior Kubernetes engineer.
+
+---
+
+# 1️⃣5️⃣ Odpowiedź na Twoje pytanie decyzyjne
+
+Twoja sytuacja:
+
+* Linux ✔
+* Docker ✔
+* infra ✔
+* automatyzacja ✔
+
+Brakuje tylko runtime K8s.
+
+👉 więc: **wchodzimy w projekt 1 teraz**
+i uczymy się K8s w jego trakcie.
+
+To dokładnie ścieżka platform engineer.
+
