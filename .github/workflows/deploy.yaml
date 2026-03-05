@@ -6,13 +6,11 @@ branches:
 - main
 
 jobs:
-
 deploy:
 runs-on: ubuntu-latest
 
-```
-steps:
 
+steps:
   - name: Checkout repository
     uses: actions/checkout@v4
 
@@ -32,5 +30,5 @@ steps:
 
   - name: Restart deployment
     run: kubectl rollout restart deployment k8s-runtime-ci
-```
+
 
