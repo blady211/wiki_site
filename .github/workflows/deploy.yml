@@ -9,23 +9,29 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Login to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Build Docker image
-        run: docker build -t 192.168.0.75:5000/k8s-runtime-ci:1.0 ./app
+        run: docker build -t ghcr.io/blady211/k8s-runtime-ci:latest ./app
 
-      - name: Login to registry
-        run: docker login 192.168.0.75:5000 -u admin -p admin
-
-      - name: Push image
-        run: docker push 192.168.0.75:5000/k8s-runtime-ci:1.0
+      - name: Push Docker image
+        run: docker push ghcr.io/blady211/k8s-runtime-ci:latest
 
       - name: Setup kubeconfig
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
 
-      - name: Restart deployment
-        run: kubectl rollout restart deployment k8s-runtime-ci
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/
+          kubectl rollout restart deployment k8s-runtime-ci
