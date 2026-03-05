@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-runtime-ci
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: k8s-runtime-ci
+  template:
+    metadata:
+      labels:
+        app: k8s-runtime-ci
+    spec:
+      containers:
+      - name: k8s-runtime-ci
+        image: ghcr.io/blady211/k8s-runtime-ci
+        ports:
+        - containerPort: 80
