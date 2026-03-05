@@ -7,11 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: write
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repository
@@ -25,11 +21,6 @@ jobs:
 
       - name: Push Docker image
         run: docker push ghcr.io/blady211/k8s-runtime-ci:latest
-
-      - name: Setup kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
 
       - name: Deploy to Kubernetes
         run: |
