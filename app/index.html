@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>IT Knowledge Hub</title>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -12,36 +14,26 @@
 
 <style>
 
-:root{
---bg:#0b1020;
---panel:#121a2f;
---sidebar:#060a16;
---border:#1e2a45;
---accent:#4ade80;
---text:#e6e9f2;
---muted:#9aa3b2;
-}
-
 body{
 margin:0;
 font-family:system-ui;
-background:linear-gradient(180deg,#050914,#0b1020);
-color:var(--text);
+background:#0f172a;
+color:#e5e7eb;
 }
 
 /* layout */
 
 .layout{
 display:grid;
-grid-template-columns:300px 1fr 260px;
+grid-template-columns:300px 1fr 240px;
 height:100vh;
 }
 
 /* sidebar */
 
 .sidebar{
-background:var(--sidebar);
-border-right:1px solid var(--border);
+background:#020617;
+border-right:1px solid #1e293b;
 display:flex;
 flex-direction:column;
 }
@@ -49,19 +41,19 @@ flex-direction:column;
 .logo{
 padding:18px;
 font-weight:700;
-border-bottom:1px solid var(--border);
+border-bottom:1px solid #1e293b;
 }
 
 .search{
 padding:12px;
-border-bottom:1px solid var(--border);
+border-bottom:1px solid #1e293b;
 }
 
 #search{
 width:100%;
 padding:10px;
 border-radius:8px;
-border:1px solid var(--border);
+border:1px solid #1e293b;
 background:#020617;
 color:white;
 }
@@ -74,20 +66,15 @@ padding:12px;
 /* folders */
 
 .tree-folder{
-font-size:12px;
-text-transform:uppercase;
-color:var(--muted);
+font-size:13px;
 margin-top:10px;
 cursor:pointer;
-display:flex;
-align-items:center;
-gap:6px;
+color:#94a3b8;
 }
 
 .tree-sub{
-margin-left:16px;
+margin-left:14px;
 display:none;
-transition:.2s;
 }
 
 .tree-sub.open{
@@ -106,9 +93,6 @@ padding:6px;
 cursor:pointer;
 border-radius:6px;
 color:#cbd5f5;
-display:flex;
-gap:6px;
-align-items:center;
 }
 
 .tree-file:hover{
@@ -116,7 +100,7 @@ background:#1e293b;
 }
 
 .tree-file.active{
-background:#22c55e;
+background:#0ea5e9;
 color:white;
 }
 
@@ -128,47 +112,39 @@ padding:40px;
 }
 
 .markdown-body{
-background:var(--panel);
+background:#020617;
 padding:40px;
-border-radius:14px;
+border-radius:12px;
 max-width:900px;
 margin:auto;
-box-shadow:0 10px 30px rgba(0,0,0,.4);
 }
 
 /* toc */
 
 .toc{
-border-left:1px solid var(--border);
+border-left:1px solid #1e293b;
 padding:20px;
 overflow:auto;
-background:#050912;
-}
-
-.toc h3{
-font-size:12px;
-text-transform:uppercase;
-color:var(--muted);
+background:#020617;
 }
 
 .toc a{
 display:block;
-color:var(--muted);
+color:#94a3b8;
 font-size:13px;
 text-decoration:none;
 padding:3px 0;
 }
 
-.toc a.active{
-color:var(--accent);
-font-weight:600;
+.toc a:hover{
+color:#38bdf8;
 }
 
 /* search results */
 
 .result{
 padding:10px;
-border-bottom:1px solid var(--border);
+border-bottom:1px solid #1e293b;
 cursor:pointer;
 }
 
@@ -178,27 +154,16 @@ font-weight:600;
 
 .result-snippet{
 font-size:13px;
-color:var(--muted);
+color:#94a3b8;
 }
 
 mark{
-background:#22c55e;
+background:#38bdf8;
 color:white;
 }
 
-/* copy */
-
-.copy{
-float:right;
-font-size:11px;
-background:#1e293b;
-padding:4px 6px;
-border-radius:6px;
-cursor:pointer;
-color:#cbd5f5;
-}
-
 </style>
+
 </head>
 
 <body>
@@ -207,9 +172,7 @@ color:#cbd5f5;
 
 <div class="sidebar">
 
-<div class="logo">
-📚 IT Knowledge Hub
-</div>
+<div class="logo">IT Knowledge Hub</div>
 
 <div class="search">
 <input id="search" placeholder="Search docs..." oninput="searchDocs()">
@@ -223,17 +186,13 @@ color:#cbd5f5;
 
 <div id="content" class="markdown-body">
 <h1>Welcome</h1>
-<p>Select a document.</p>
+<p>Select document from sidebar.</p>
 </div>
 
 </div>
 
 <div class="toc">
-
-<h3>On this page</h3>
-
 <div id="toc"></div>
-
 </div>
 
 </div>
@@ -242,51 +201,38 @@ color:#cbd5f5;
 
 const repo="blady211/wiki_site";
 
-let indexCache=[];
+let docs=[];
 let fuse;
 
-/* fetch */
+/* fetch helper */
 
-async function safeFetch(url){
-try{
+async function getJSON(url){
 const r=await fetch(url);
-if(!r.ok) return null;
-return r;
-}catch{
-return null;
-}
+if(!r.ok) return [];
+return r.json();
 }
 
-/* repo scan */
+/* scan repo */
 
-async function indexRepo(path=""){
+async function scan(path=""){
 
 const url=`https://api.github.com/repos/${repo}/contents/${path}`;
 
-const res=await safeFetch(url);
-if(!res) return;
-
-const items=await res.json();
+const items=await getJSON(url);
 
 for(const item of items){
 
 if(item.type==="dir"){
-await indexRepo(item.path);
+await scan(item.path);
 continue;
 }
 
 if(!item.name.endsWith(".md")) continue;
 
-const textRes=await safeFetch(item.download_url);
-if(!textRes) continue;
-
-const text=await textRes.text();
-
-indexCache.push({
+docs.push({
 title:item.name.replace(".md",""),
 path:item.path,
-url:item.download_url,
-text
+url:item.download_url
 });
 
 }
@@ -297,94 +243,39 @@ text
 
 function buildTree(){
 
-const root={};
-
-indexCache.forEach(doc=>{
-
-const parts=doc.path.split("/");
-
-let level=root;
-
-for(let i=0;i<parts.length;i++){
-
-const part=parts[i];
-
-if(i===parts.length-1){
-
-if(!level.files) level.files=[];
-level.files.push(doc);
-
-}else{
-
-if(!level[part]) level[part]={};
-level=level[part];
-
-}
-
-}
-
-});
-
 const menu=document.getElementById("menu");
+
 menu.innerHTML="";
 
-renderTree(root,menu);
-
-}
-
-function renderTree(obj,parent){
-
-for(const key in obj){
-
-if(key==="files"){
-
-obj.files.forEach(doc=>{
+docs.forEach(doc=>{
 
 const btn=document.createElement("button");
+
 btn.className="tree-file";
-btn.innerHTML="📄 "+doc.title;
+
+btn.textContent=doc.title;
 
 btn.onclick=()=>openDoc(doc);
 
-parent.appendChild(btn);
+menu.appendChild(btn);
 
 });
 
-continue;
 }
 
-const folder=document.createElement("div");
-folder.className="tree-folder";
-folder.innerHTML="📁 "+key;
+/* open markdown */
 
-const sub=document.createElement("div");
-sub.className="tree-sub";
+async function openDoc(doc){
 
-folder.onclick=()=>{
+const r=await fetch(doc.url);
 
-const open=sub.classList.toggle("open");
+const text=await r.text();
 
-folder.innerHTML=(open?"📂 ":"📁 ")+key;
+doc.text=text;
 
-};
-
-parent.appendChild(folder);
-parent.appendChild(sub);
-
-renderTree(obj[key],sub);
-
-}
-
-}
-
-/* open doc */
-
-function openDoc(doc){
-
-document.getElementById("content").innerHTML=marked.parse(doc.text);
+document.getElementById("content").innerHTML=marked.parse(text);
 
 generateTOC();
-addCopy();
 
 }
 
@@ -393,6 +284,7 @@ addCopy();
 function generateTOC(){
 
 const toc=document.getElementById("toc");
+
 toc.innerHTML="";
 
 const headers=document.querySelectorAll("#content h2,#content h3");
@@ -404,85 +296,23 @@ const id=h.textContent.toLowerCase().replace(/\s+/g,"-");
 h.id=id;
 
 const a=document.createElement("a");
+
 a.href="#"+id;
+
 a.textContent=h.textContent;
 
 toc.appendChild(a);
 
 });
 
-observeSections();
-
-}
-
-/* highlight current section */
-
-function observeSections(){
-
-const links=document.querySelectorAll(".toc a");
-
-const observer=new IntersectionObserver(entries=>{
-
-entries.forEach(entry=>{
-
-if(entry.isIntersecting){
-
-links.forEach(l=>l.classList.remove("active"));
-
-const link=document.querySelector(`.toc a[href="#${entry.target.id}"]`);
-
-if(link) link.classList.add("active");
-
-}
-
-});
-
-},{rootMargin:"-40% 0px -55% 0px"});
-
-document.querySelectorAll("#content h2,#content h3")
-.forEach(sec=>observer.observe(sec));
-
-}
-
-/* copy code */
-
-function addCopy(){
-
-document.querySelectorAll("pre code").forEach(block=>{
-
-const btn=document.createElement("span");
-btn.className="copy";
-btn.textContent="copy";
-
-btn.onclick=()=>{
-navigator.clipboard.writeText(block.innerText);
-btn.textContent="copied";
-setTimeout(()=>btn.textContent="copy",1500);
-};
-
-block.parentElement.prepend(btn);
-
-});
-
-}
-
-/* snippet */
-
-function snippet(text,q){
-
-const i=text.toLowerCase().indexOf(q.toLowerCase());
-
-if(i<0) return text.slice(0,120);
-
-return text.slice(Math.max(0,i-60),i+120);
-
 }
 
 /* search */
 
-function searchDocs(){
+async function searchDocs(){
 
 const q=document.getElementById("search").value.trim();
+
 const menu=document.getElementById("menu");
 
 if(!q){
@@ -490,26 +320,38 @@ buildTree();
 return;
 }
 
+if(!fuse){
+
+for(const d of docs){
+
+if(!d.text){
+
+const r=await fetch(d.url);
+
+d.text=await r.text();
+
+}
+
+}
+
+fuse=new Fuse(docs,{
+keys:["title","text"],
+threshold:0.35
+});
+
+}
+
 const results=fuse.search(q);
 
 menu.innerHTML="";
 
-results.slice(0,25).forEach(r=>{
+results.slice(0,20).forEach(r=>{
 
 const div=document.createElement("div");
+
 div.className="result";
 
-const t=document.createElement("div");
-t.className="result-title";
-t.textContent=r.item.title;
-
-const s=document.createElement("div");
-s.className="result-snippet";
-
-s.innerHTML=snippet(r.item.text,q).replaceAll(q,"<mark>"+q+"</mark>");
-
-div.appendChild(t);
-div.appendChild(s);
+div.innerHTML="<div class='result-title'>"+r.item.title+"</div>";
 
 div.onclick=()=>openDoc(r.item);
 
@@ -523,13 +365,7 @@ menu.appendChild(div);
 
 async function init(){
 
-await indexRepo();
-
-fuse=new Fuse(indexCache,{
-keys:["title","text"],
-threshold:0.35,
-ignoreLocation:true
-});
+await scan();
 
 buildTree();
 
