@@ -1,203 +1,379 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IT Knowledge Hub</title>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.min.css">
 
 <style>
-/* --- TU NIC NIE ZMIENIAŁEM --- */
-body{margin:0;font-family:system-ui;background:#0f172a;color:#e5e7eb}
-.layout{display:flex;height:100vh}
-.sidebar{width:280px;background:#020617;border-right:1px solid #1e293b;padding:18px;overflow-y:auto}
-#search{width:100%;padding:8px 10px;margin-bottom:14px;border-radius:8px;border:1px solid #1e293b;background:#0b1220;color:#e5e7eb}
-.tree-folder{cursor:pointer;color:#94a3b8;font-size:13px;text-transform:uppercase;margin:14px 0 4px;display:flex;align-items:center;gap:6px}
-.tree-sub{margin-left:12px;display:none}
-.tree-sub.open{display:block}
-.tree-file{display:block;background:none;border:none;color:#cbd5f5;padding:6px 8px;cursor:pointer;border-radius:6px;font-size:14px;width:100%;text-align:left}
-.tree-file:hover{background:rgba(56,189,248,.15)}
-.tree-file.active{background:rgba(56,189,248,.25);color:#fff}
-.content{flex:1;padding:32px;overflow-y:auto}
-.markdown-body{background:#0b1220;padding:32px;border-radius:10px;max-width:900px}
-.toc{width:220px;border-left:1px solid #1e293b;padding:18px;overflow-y:auto;background:#020617}
-.toc h3{margin-top:0;font-size:13px;color:#94a3b8;text-transform:uppercase}
-.toc a{display:block;color:#94a3b8;text-decoration:none;padding:4px 0;font-size:13px}
-.toc a:hover{color:#38bdf8}
+
+body{
+margin:0;
+font-family:Inter,system-ui;
+background:linear-gradient(180deg,#020617,#020617,#0f172a);
+color:#e5e7eb;
+}
+
+.topbar{
+height:60px;
+display:flex;
+align-items:center;
+padding:0 28px;
+font-weight:600;
+font-size:18px;
+background:#020617;
+border-bottom:1px solid #1e293b;
+letter-spacing:.4px;
+}
+
+.layout{
+display:flex;
+height:calc(100vh - 60px);
+}
+
+.sidebar{
+width:300px;
+background:rgba(2,6,23,.85);
+backdrop-filter:blur(12px);
+border-right:1px solid #1e293b;
+padding:18px;
+overflow-y:auto;
+}
+
+#search{
+width:100%;
+padding:10px 12px;
+margin-bottom:16px;
+border-radius:10px;
+border:1px solid #1e293b;
+background:#020617;
+color:#fff;
+font-size:14px;
+}
+
+.tree-folder{
+cursor:pointer;
+color:#94a3b8;
+font-size:13px;
+text-transform:uppercase;
+margin:14px 0 4px;
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+.tree-sub{
+margin-left:12px;
+display:none;
+}
+
+.tree-sub.open{
+display:block;
+}
+
+.tree-file{
+display:block;
+background:none;
+border:none;
+color:#cbd5f5;
+padding:7px 8px;
+cursor:pointer;
+border-radius:6px;
+font-size:14px;
+width:100%;
+text-align:left;
+transition:.15s;
+}
+
+.tree-file:hover{
+background:rgba(56,189,248,.25);
+transform:translateX(3px);
+}
+
+.tree-file.active{
+background:rgba(56,189,248,.35);
+color:#fff;
+}
+
+.content{
+flex:1;
+padding:40px;
+overflow-y:auto;
+}
+
+.markdown-body{
+background:#020617;
+padding:40px;
+border-radius:14px;
+max-width:950px;
+box-shadow:0 10px 40px rgba(0,0,0,.5);
+}
+
+.toc{
+width:240px;
+border-left:1px solid #1e293b;
+padding:20px;
+overflow-y:auto;
+background:#020617;
+}
+
+.toc h3{
+margin-top:0;
+font-size:13px;
+color:#94a3b8;
+text-transform:uppercase;
+}
+
+.toc a{
+display:block;
+color:#94a3b8;
+text-decoration:none;
+padding:4px 0;
+font-size:13px;
+}
+
+.toc a:hover{
+color:#38bdf8;
+}
+
+::-webkit-scrollbar{
+width:6px;
+}
+
+::-webkit-scrollbar-thumb{
+background:#1e293b;
+border-radius:10px;
+}
+
 </style>
 </head>
 
 <body>
 
+<header class="topbar">
+IT Knowledge Hub
+</header>
+
 <div class="layout">
 
-  <div class="sidebar">
-    <input id="search" placeholder="Search (* wildcard)" oninput="searchDocs()">
-    <div id="menu"></div>
-  </div>
+<div class="sidebar">
+<input id="search" placeholder="Search documentation..." oninput="searchDocs()">
+<div id="menu"></div>
+</div>
 
-  <div class="content">
-    <div id="content" class="markdown-body">
-      <h1>IT Knowledge Hub</h1>
-      <p>Select document.</p>
-    </div>
-  </div>
+<div class="content">
+<div id="content" class="markdown-body">
+<h1>IT Knowledge Hub</h1>
+<p>Select a document from the menu.</p>
+</div>
+</div>
 
-  <div class="toc">
-    <h3>On this page</h3>
-    <div id="toc"></div>
-  </div>
+<div class="toc">
+<h3>On this page</h3>
+<div id="toc"></div>
+</div>
 
 </div>
 
 <script>
+
 const repo="blady211/wiki_site";
 const folders=["self-learning","interview","projects"];
 
 let indexCache=[];
+let fuse;
 
-/* ---------- SAFE FETCH (NOWE – obsługa limitów API) ---------- */
 async function safeFetch(url){
-  try{
-    const res = await fetch(url);
-    if(!res.ok){
-      console.error("HTTP error:", res.status);
-      return null;
-    }
-    return res;
-  }catch(err){
-    console.error("Network error:", err);
-    return null;
-  }
+try{
+const res=await fetch(url);
+if(!res.ok) return null;
+return res;
+}catch(e){
+return null;
+}
 }
 
-/* ---------- INIT ---------- */
 init();
 
 async function init(){
-  const menu=document.getElementById("menu");
-  if(!menu) return;  // zabezpieczenie
-  menu.innerHTML="";
 
-  for(const root of folders){
-    await buildTree(root,menu,true);
-  }
+const menu=document.getElementById("menu");
+menu.innerHTML="";
+
+indexCache=[];
+
+for(const root of folders){
+await buildTree(root,menu);
 }
 
-/* ---------- TITLE ---------- */
+initSearch();
+
+}
+
 function prettyTitle(name){
-  return name
-    .replace(".md","")
-    .replace(/_/g," ")
-    .replace(/-/g," ")
-    .replace(/\b\w/g,l=>l.toUpperCase())
-    .replace(" Ad "," AD ")
-    .replace(" Gpo "," GPO ");
+
+return name
+.replace(".md","")
+.replace(/_/g," ")
+.replace(/-/g," ")
+.replace(/\b\w/g,l=>l.toUpperCase())
+.replace(" Ad "," AD ")
+.replace(" Gpo "," GPO ");
+
 }
 
-/* ---------- TREE BUILDER ---------- */
-async function buildTree(path,parent,root=false){
+async function buildTree(path,parent){
 
-  const url=`https://api.github.com/repos/${repo}/contents/${path}`;
-  const res=await safeFetch(url);
-  if(!res) return;
+const url=`https://api.github.com/repos/${repo}/contents/${path}`;
 
-  const items=await res.json();
+const res=await safeFetch(url);
+if(!res) return;
 
-  if(!Array.isArray(items)){
-    console.error("GitHub API returned:", items);
-    return;
-  }
+const items=await res.json();
+if(!Array.isArray(items)) return;
 
-  const folderName=path.split("/").pop();
-  const folderTitle=prettyTitle(folderName);
+const folderName=path.split("/").pop();
+const folderTitle=prettyTitle(folderName);
 
-  const folderEl=document.createElement("div");
-  folderEl.className="tree-folder";
-  folderEl.innerHTML=`▶ ${folderTitle}`;
+const folder=document.createElement("div");
+folder.className="tree-folder";
+folder.innerHTML=`▶ ${folderTitle}`;
 
-  const sub=document.createElement("div");
-  sub.className="tree-sub";
+const sub=document.createElement("div");
+sub.className="tree-sub";
 
-  folderEl.onclick=()=>{
-    const open=sub.classList.toggle("open");
-    folderEl.innerHTML=(open?"▼ ":"▶ ")+folderTitle;
-  };
+folder.onclick=()=>{
+const open=sub.classList.toggle("open");
+folder.innerHTML=(open?"▼ ":"▶ ")+folderTitle;
+};
 
-  parent.appendChild(folderEl);
-  parent.appendChild(sub);
+parent.appendChild(folder);
+parent.appendChild(sub);
 
-  for(const item of items){
+for(const item of items){
 
-    if(item.type==="dir"){
-      await buildTree(item.path,sub);
-      continue;
-    }
-
-    if(!item.name.endsWith(".md")) continue;
-
-    const raw=item.download_url;
-    const textRes=await safeFetch(raw);
-    if(!textRes) continue;
-
-    const text=await textRes.text();
-
-    indexCache.push({title:prettyTitle(item.name),path:raw,text});
-
-    const file=document.createElement("button");
-    file.className="tree-file";
-    file.textContent="• "+prettyTitle(item.name);
-
-    file.onclick=()=>{
-      document.querySelectorAll(".tree-file").forEach(f=>f.classList.remove("active"));
-      file.classList.add("active");
-      openDoc(raw);
-    };
-
-    sub.appendChild(file);
-  }
+if(item.type==="dir"){
+await buildTree(item.path,sub);
+continue;
 }
 
-/* ---------- OPEN DOC ---------- */
+if(!item.name.endsWith(".md")) continue;
+
+const raw=item.download_url;
+
+const textRes=await safeFetch(raw);
+if(!textRes) continue;
+
+const text=await textRes.text();
+
+indexCache.push({
+title:prettyTitle(item.name),
+path:raw,
+text
+});
+
+const file=document.createElement("button");
+
+file.className="tree-file";
+file.textContent="• "+prettyTitle(item.name);
+
+file.onclick=()=>{
+
+document.querySelectorAll(".tree-file").forEach(f=>f.classList.remove("active"));
+file.classList.add("active");
+
+openDoc(raw);
+
+};
+
+sub.appendChild(file);
+
+}
+
+}
+
 function openDoc(url){
-  const doc=indexCache.find(d=>d.path===url);
-  if(!doc) return;
 
-  document.getElementById("content").innerHTML=marked.parse(doc.text);
-  generateTOC();
+const doc=indexCache.find(d=>d.path===url);
+if(!doc) return;
+
+document.getElementById("content").innerHTML=marked.parse(doc.text);
+
+generateTOC();
+
 }
 
-/* ---------- TOC ---------- */
 function generateTOC(){
-  const toc=document.getElementById("toc");
-  toc.innerHTML="";
-  const headers=document.querySelectorAll("#content h2,#content h3");
 
-  headers.forEach(h=>{
-    const id=h.textContent.toLowerCase().replace(/[^\w\s]/g,"").replace(/\s+/g,"-");
-    h.id=id;
+const toc=document.getElementById("toc");
+toc.innerHTML="";
 
-    const a=document.createElement("a");
-    a.href="#"+id;
-    a.textContent=h.textContent;
-    toc.appendChild(a);
-  });
+const headers=document.querySelectorAll("#content h2,#content h3");
+
+headers.forEach(h=>{
+
+const id=h.textContent
+.toLowerCase()
+.replace(/[^\w\s]/g,"")
+.replace(/\s+/g,"-");
+
+h.id=id;
+
+const a=document.createElement("a");
+
+a.href="#"+id;
+a.textContent=h.textContent;
+
+toc.appendChild(a);
+
+});
+
 }
 
-/* ---------- SEARCH ---------- */
+function initSearch(){
+
+fuse=new Fuse(indexCache,{
+keys:["title","text"],
+threshold:0.35
+});
+
+}
+
 function searchDocs(){
-  const q=document.getElementById("search").value.toLowerCase().trim();
-  if(!q) return;
 
-  for(const doc of indexCache){
-    if(doc.text.toLowerCase().includes(q)||doc.title.toLowerCase().includes(q)){
-      openDoc(doc.path);
-      break;
-    }
-  }
+const q=document.getElementById("search").value.trim();
+
+if(!q){
+init();
+return;
 }
+
+const results=fuse.search(q);
+
+const menu=document.getElementById("menu");
+
+menu.innerHTML="<div class='tree-folder'>Search Results</div>";
+
+results.slice(0,20).forEach(r=>{
+
+const btn=document.createElement("button");
+
+btn.className="tree-file";
+btn.textContent=r.item.title;
+
+btn.onclick=()=>openDoc(r.item.path);
+
+menu.appendChild(btn);
+
+});
+
+}
+
 </script>
 
 </body>
