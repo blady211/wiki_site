@@ -12,14 +12,14 @@ jobs:
 
     steps:
 
-    - name: Checkout
+    - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Build image
+    - name: Build Docker image
       run: |
         docker build -t 192.168.0.101:5000/wiki-site:${{ github.sha }} ./app
 
-    - name: Push image
+    - name: Push image to registry
       run: |
         docker push 192.168.0.101:5000/wiki-site:${{ github.sha }}
 
@@ -27,8 +27,17 @@ jobs:
       run: |
         kubectl set image deployment/wiki-site \
         wiki=192.168.0.101:5000/wiki-site:${{ github.sha }}
-        --record
-    
+
+    - name: Add deployment annotation
+      run: |
+        kubectl annotate deployment wiki-site \
+        kubernetes.io/change-cause="deploy commit ${{ github.sha }}" \
+        --overwrite
+
     - name: Wait for rollout
       run: |
         kubectl rollout status deployment/wiki-site
+
+    - name: Show pods
+      run: |
+        kubectl get pods -o wide
