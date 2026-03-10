@@ -27,3 +27,8 @@ jobs:
       run: |
         kubectl set image deployment/wiki-site \
         wiki=192.168.0.101:5000/wiki-site:${{ github.sha }}
+        --record
+    
+    - name: Wait for rollout
+      run: |
+        kubectl rollout status deployment/wiki-site
