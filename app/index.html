@@ -1,74 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>IT Knowledge Hub v2</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IT Knowledge Hub</title>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.min.css">
-<script src="https://cdn.jsdelivr.net/npm/lunr@2.3.9/lunr.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
 
 <style>
-/* Istniejący CSS */
-body{margin:0;font-family:system-ui;background:#0f172a;color:#e5e7eb}
-.layout{display:flex;height:100vh}
-.sidebar{width:280px;background:#020617;border-right:1px solid #1e293b;padding:18px;overflow-y:auto}
-#search{width:100%;padding:8px 10px;margin-bottom:14px;border-radius:8px;border:1px solid #1e293b;background:#0b1220;color:#e5e7eb}
-.tree-folder{cursor:pointer;color:#94a3b8;font-size:13px;text-transform:uppercase;margin:14px 0 4px;display:flex;align-items:center;gap:6px}
-.tree-sub{margin-left:12px;display:none}
-.tree-sub.open{display:block}
-.tree-file{display:block;background:none;border:none;color:#cbd5f5;padding:6px 8px;cursor:pointer;border-radius:6px;font-size:14px;width:100%;text-align:left}
-.tree-file:hover{background:rgba(56,189,248,.15)}
-.tree-file.active{background:rgba(56,189,248,.25);color:#fff}
-.content{flex:1;padding:32px;overflow-y:auto}
-.markdown-body{background:#0b1220;padding:32px;border-radius:10px;max-width:900px}
-.toc{width:220px;border-left:1px solid #1e293b;padding:18px;overflow-y:auto;background:#020617}
-.toc h3{margin-top:0;font-size:13px;color:#94a3b8;text-transform:uppercase}
-.toc a{display:block;color:#94a3b8;text-decoration:none;padding:4px 0;font-size:13px}
-.toc a:hover{color:#38bdf8}
 
-/* NOWY CSS dla wyników wyszukiwania */
-#searchResults {
-  background: #0b1220;
-  border-radius: 10px;
-  padding: 16px;
-  max-width: 900px;
-  margin-top: 16px;
-  border: 1px solid #1e293b;
-  display: none; /* Domyślnie ukryte */
+:root{
+--bg:#0b1020;
+--panel:#121a2f;
+--sidebar:#060a16;
+--border:#1e2a45;
+--accent:#4ade80;
+--text:#e6e9f2;
+--muted:#9aa3b2;
 }
-#searchResults.visible {
-    display: block;
+
+body{
+margin:0;
+font-family:system-ui;
+background:linear-gradient(180deg,#050914,#0b1020);
+color:var(--text);
 }
-#searchResults h3 {
-    margin-top: 0;
-    color: #cbd5f5;
-    font-size: 1.2em;
+
+/* layout */
+
+.layout{
+display:grid;
+grid-template-columns:300px 1fr 260px;
+height:100vh;
 }
-.search-result-item {
-    padding: 8px 0;
-    border-bottom: 1px dashed #1e293b;
+
+/* sidebar */
+
+.sidebar{
+background:var(--sidebar);
+border-right:1px solid var(--border);
+display:flex;
+flex-direction:column;
 }
-.search-result-item:last-child {
-    border-bottom: none;
+
+.logo{
+padding:18px;
+font-weight:700;
+border-bottom:1px solid var(--border);
 }
-.search-result-item a {
-    color: #38bdf8;
-    text-decoration: none;
-    font-weight: bold;
-    display: block;
-    margin-bottom: 4px;
+
+.search{
+padding:12px;
+border-bottom:1px solid var(--border);
 }
-.search-result-item a:hover {
-    text-decoration: underline;
+
+#search{
+width:100%;
+padding:10px;
+border-radius:8px;
+border:1px solid var(--border);
+background:#020617;
+color:white;
 }
-.search-result-item p {
-    color: #94a3b8;
-    font-size: 0.9em;
-    margin: 0;
+
+.tree{
+overflow:auto;
+padding:12px;
 }
+
+/* folders */
+
+.tree-folder{
+font-size:12px;
+text-transform:uppercase;
+color:var(--muted);
+margin-top:10px;
+cursor:pointer;
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+.tree-sub{
+margin-left:16px;
+display:none;
+transition:.2s;
+}
+
+.tree-sub.open{
+display:block;
+}
+
+/* files */
+
+.tree-file{
+display:block;
+width:100%;
+text-align:left;
+background:none;
+border:none;
+padding:6px;
+cursor:pointer;
+border-radius:6px;
+color:#cbd5f5;
+display:flex;
+gap:6px;
+align-items:center;
+}
+
+.tree-file:hover{
+background:#1e293b;
+}
+
+.tree-file.active{
+background:#22c55e;
+color:white;
+}
+
+/* content */
+
+.content{
+overflow:auto;
+padding:40px;
+}
+
+.markdown-body{
+background:var(--panel);
+padding:40px;
+border-radius:14px;
+max-width:900px;
+margin:auto;
+box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+
+/* toc */
+
+.toc{
+border-left:1px solid var(--border);
+padding:20px;
+overflow:auto;
+background:#050912;
+}
+
+.toc h3{
+font-size:12px;
+text-transform:uppercase;
+color:var(--muted);
+}
+
+.toc a{
+display:block;
+color:var(--muted);
+font-size:13px;
+text-decoration:none;
+padding:3px 0;
+}
+
+.toc a.active{
+color:var(--accent);
+font-weight:600;
+}
+
+/* search results */
+
+.result{
+padding:10px;
+border-bottom:1px solid var(--border);
+cursor:pointer;
+}
+
+.result-title{
+font-weight:600;
+}
+
+.result-snippet{
+font-size:13px;
+color:var(--muted);
+}
+
+mark{
+background:#22c55e;
+color:white;
+}
+
+/* copy */
+
+.copy{
+float:right;
+font-size:11px;
+background:#1e293b;
+padding:4px 6px;
+border-radius:6px;
+cursor:pointer;
+color:#cbd5f5;
+}
+
 </style>
 </head>
 
@@ -76,270 +205,339 @@ body{margin:0;font-family:system-ui;background:#0f172a;color:#e5e7eb}
 
 <div class="layout">
 
-  <div class="sidebar">
-    <input id="search" placeholder="Search (* wildcard)" oninput="searchDocs()">
-    <div id="menu"></div>
-  </div>
+<div class="sidebar">
 
-  <div class="content">
-    <div id="content" class="markdown-body">
-      <h1>IT Knowledge Hub v2</h1>
-      <p>Witaj w ulepszonej bazie wiedzy! Użyj wyszukiwarki lub wybierz dokument z menu.</p>
-    </div>
-    <div id="searchResults" class="markdown-body">
-        <h3>Wyniki wyszukiwania:</h3>
-        <div id="resultsList"></div>
-    </div>
-  </div>
+<div class="logo">
+📚 IT Knowledge Hub
+</div>
 
-  <div class="toc">
-    <h3>Spis treści</h3>
-    <div id="toc"></div>
-  </div>
+<div class="search">
+<input id="search" placeholder="Search docs..." oninput="searchDocs()">
+</div>
+
+<div id="menu" class="tree"></div>
+
+</div>
+
+<div class="content">
+
+<div id="content" class="markdown-body">
+<h1>Welcome</h1>
+<p>Select a document.</p>
+</div>
+
+</div>
+
+<div class="toc">
+
+<h3>On this page</h3>
+
+<div id="toc"></div>
+
+</div>
 
 </div>
 
 <script>
+
 const repo="blady211/wiki_site";
-const folders=["self-learning","interview","projects"];
 
-let indexCache = []; // Będzie zawierać { id, title, path, text }
-let lunrIndex; // Globalna zmienna dla indeksu Lunr
-let documentsForLunr = []; // Dane do zaindeksowania przez Lunr
+let indexCache=[];
+let fuse;
 
-/* ---------- MERMAID CONFIG ---------- */
-mermaid.initialize({ startOnLoad: true });
+/* fetch */
 
-/* ---------- SAFE FETCH (NOWE – obsługa limitów API) ---------- */
 async function safeFetch(url){
-  try{
-    const res = await fetch(url);
-    if(!res.ok){
-      console.error("HTTP error:", res.status);
-      // Możesz dodać lepsze komunikaty dla użytkownika, np. "limit API GitHub osiągnięty"
-      return null;
-    }
-    return res;
-  }catch(err){
-    console.error("Network error:", err);
-    return null;
-  }
+try{
+const r=await fetch(url);
+if(!r.ok) return null;
+return r;
+}catch{
+return null;
+}
 }
 
-/* ---------- INIT (zmodyfikowane) ---------- */
-init();
+/* repo scan */
 
-async function init(){
-  const menu=document.getElementById("menu");
-  if(!menu) return;
-  menu.innerHTML="";
+async function indexRepo(path=""){
 
-  // Wyczyść cache i dane do Lunr przed budowaniem drzewa
-  indexCache = [];
-  documentsForLunr = [];
+const url=`https://api.github.com/repos/${repo}/contents/${path}`;
 
-  for(const root of folders){
-    await buildTree(root,menu,true);
-  }
+const res=await safeFetch(url);
+if(!res) return;
 
-  // Po zbudowaniu całego drzewa i pobraniu danych, zainicjuj Lunr
-  initSearch();
+const items=await res.json();
+
+for(const item of items){
+
+if(item.type==="dir"){
+await indexRepo(item.path);
+continue;
 }
 
-/* ---------- TITLE ---------- */
-function prettyTitle(name){
-  return name
-    .replace(".md","")
-    .replace(/_/g," ")
-    .replace(/-/g," ")
-    .replace(/\b\w/g,l=>l.toUpperCase())
-    .replace(" Ad "," AD ")
-    .replace(" Gpo "," GPO ");
+if(!item.name.endsWith(".md")) continue;
+
+const textRes=await safeFetch(item.download_url);
+if(!textRes) continue;
+
+const text=await textRes.text();
+
+indexCache.push({
+title:item.name.replace(".md",""),
+path:item.path,
+url:item.download_url,
+text
+});
+
 }
 
-/* ---------- TREE BUILDER (zmodyfikowane) ---------- */
-async function buildTree(path,parent,root=false){
-
-  const url=`https://api.github.com/repos/${repo}/contents/${path}`;
-  const res=await safeFetch(url);
-  if(!res) return;
-
-  const items=await res.json();
-
-  if(!Array.isArray(items)){
-    console.error("GitHub API returned:", items);
-    return;
-  }
-
-  const folderName=path.split("/").pop();
-  const folderTitle=prettyTitle(folderName);
-
-  const folderEl=document.createElement("div");
-  folderEl.className="tree-folder";
-  folderEl.innerHTML=`▶ ${folderTitle}`;
-
-  const sub=document.createElement("div");
-  sub.className="tree-sub";
-
-  folderEl.onclick=()=>{
-    const open=sub.classList.toggle("open");
-    folderEl.innerHTML=(open?"▼ ":"▶ ")+folderTitle;
-  };
-
-  parent.appendChild(folderEl);
-  parent.appendChild(sub);
-
-  for(const item of items){
-
-    if(item.type==="dir"){
-      await buildTree(item.path,sub);
-      continue;
-    }
-
-    if(!item.name.endsWith(".md")) continue;
-
-    const raw=item.download_url;
-    const textRes=await safeFetch(raw);
-    if(!textRes) continue;
-
-    const text=await textRes.text();
-    const docId = indexCache.length; // Unikalne ID dla każdego dokumentu
-
-    indexCache.push({ id: docId, title: prettyTitle(item.name), path: raw, text: text });
-    documentsForLunr.push({ id: docId, title: prettyTitle(item.name), text: text, path: raw  }); // Dodajemy do indeksowania
-
-    const file=document.createElement("button");
-    file.className="tree-file";
-    file.textContent="• "+prettyTitle(item.name);
-
-    file.onclick=()=>{
-      document.querySelectorAll(".tree-file").forEach(f=>f.classList.remove("active"));
-      file.classList.add("active");
-      // Ukryj wyniki wyszukiwania po kliknięciu na plik
-      document.getElementById("searchResults").classList.remove("visible");
-      openDoc(raw);
-    };
-
-    sub.appendChild(file);
-  }
 }
 
-/* ---------- OPEN DOC (zmodyfikowane) ---------- */
-function openDoc(url){
-  const doc = indexCache.find(d => d.path === url);
-  if(!doc) {
-    console.error("Document not found in cache:", url);
-    return;
-  }
+/* build tree */
 
-  const contentDiv = document.getElementById("content");
-  contentDiv.innerHTML = marked.parse(doc.text);
+function buildTree(){
 
-  // Po wstawieniu markdownu, renderuj diagramy Mermaid
-  mermaid.run({
-    querySelector: '.markdown-body pre.mermaid, .markdown-body code.mermaid',
-  });
+const root={};
 
-  generateTOC();
+indexCache.forEach(doc=>{
+
+const parts=doc.path.split("/");
+
+let level=root;
+
+for(let i=0;i<parts.length;i++){
+
+const part=parts[i];
+
+if(i===parts.length-1){
+
+if(!level.files) level.files=[];
+level.files.push(doc);
+
+}else{
+
+if(!level[part]) level[part]={};
+level=level[part];
+
 }
 
-/* ---------- TOC ---------- */
+}
+
+});
+
+const menu=document.getElementById("menu");
+menu.innerHTML="";
+
+renderTree(root,menu);
+
+}
+
+function renderTree(obj,parent){
+
+for(const key in obj){
+
+if(key==="files"){
+
+obj.files.forEach(doc=>{
+
+const btn=document.createElement("button");
+btn.className="tree-file";
+btn.innerHTML="📄 "+doc.title;
+
+btn.onclick=()=>openDoc(doc);
+
+parent.appendChild(btn);
+
+});
+
+continue;
+}
+
+const folder=document.createElement("div");
+folder.className="tree-folder";
+folder.innerHTML="📁 "+key;
+
+const sub=document.createElement("div");
+sub.className="tree-sub";
+
+folder.onclick=()=>{
+
+const open=sub.classList.toggle("open");
+
+folder.innerHTML=(open?"📂 ":"📁 ")+key;
+
+};
+
+parent.appendChild(folder);
+parent.appendChild(sub);
+
+renderTree(obj[key],sub);
+
+}
+
+}
+
+/* open doc */
+
+function openDoc(doc){
+
+document.getElementById("content").innerHTML=marked.parse(doc.text);
+
+generateTOC();
+addCopy();
+
+}
+
+/* toc */
+
 function generateTOC(){
-  const toc=document.getElementById("toc");
-  toc.innerHTML="";
-  const headers=document.querySelectorAll("#content h2,#content h3");
 
-  headers.forEach(h=>{
-    const id=h.textContent.toLowerCase().replace(/[^\w\s]/g,"").replace(/\s+/g,"-");
-    h.id=id;
+const toc=document.getElementById("toc");
+toc.innerHTML="";
 
-    const a=document.createElement("a");
-    a.href="#"+id;
-    a.textContent=h.textContent;
-    toc.appendChild(a);
-  });
+const headers=document.querySelectorAll("#content h2,#content h3");
+
+headers.forEach(h=>{
+
+const id=h.textContent.toLowerCase().replace(/\s+/g,"-");
+
+h.id=id;
+
+const a=document.createElement("a");
+a.href="#"+id;
+a.textContent=h.textContent;
+
+toc.appendChild(a);
+
+});
+
+observeSections();
+
 }
 
-/* ---------- SEARCH (zmodyfikowane z Lunr.js) ---------- */
-function initSearch() {
-    lunrIndex = lunr(function () {
-        this.ref('id');
-        this.field('title', { boost: 10 });
-        this.field('text');
+/* highlight current section */
 
-        documentsForLunr.forEach(function (doc) {
-            this.add(doc);
-        }, this);
-    });
-    console.log("Lunr index built with", documentsForLunr.length, "documents.");
+function observeSections(){
+
+const links=document.querySelectorAll(".toc a");
+
+const observer=new IntersectionObserver(entries=>{
+
+entries.forEach(entry=>{
+
+if(entry.isIntersecting){
+
+links.forEach(l=>l.classList.remove("active"));
+
+const link=document.querySelector(`.toc a[href="#${entry.target.id}"]`);
+
+if(link) link.classList.add("active");
+
 }
+
+});
+
+},{rootMargin:"-40% 0px -55% 0px"});
+
+document.querySelectorAll("#content h2,#content h3")
+.forEach(sec=>observer.observe(sec));
+
+}
+
+/* copy code */
+
+function addCopy(){
+
+document.querySelectorAll("pre code").forEach(block=>{
+
+const btn=document.createElement("span");
+btn.className="copy";
+btn.textContent="copy";
+
+btn.onclick=()=>{
+navigator.clipboard.writeText(block.innerText);
+btn.textContent="copied";
+setTimeout(()=>btn.textContent="copy",1500);
+};
+
+block.parentElement.prepend(btn);
+
+});
+
+}
+
+/* snippet */
+
+function snippet(text,q){
+
+const i=text.toLowerCase().indexOf(q.toLowerCase());
+
+if(i<0) return text.slice(0,120);
+
+return text.slice(Math.max(0,i-60),i+120);
+
+}
+
+/* search */
 
 function searchDocs(){
-    const query = document.getElementById("search").value.toLowerCase().trim();
-    const searchResultsDiv = document.getElementById("searchResults");
-    const resultsList = document.getElementById("resultsList");
-    const contentDiv = document.getElementById("content");
 
-    resultsList.innerHTML = ''; // Wyczyść poprzednie wyniki
+const q=document.getElementById("search").value.trim();
+const menu=document.getElementById("menu");
 
-    if (!query) {
-        searchResultsDiv.classList.remove("visible");
-        contentDiv.style.display = 'block'; // Pokaż główną zawartość
-        return;
-    }
-
-    contentDiv.style.display = 'none'; // Ukryj główną zawartość
-    searchResultsDiv.classList.add("visible"); // Pokaż wyniki wyszukiwania div
-
-    try {
-        const results = lunrIndex.search(query + "*"); // Dodajemy * dla wyszukiwania częściowego
-        if (results.length === 0) {
-            resultsList.innerHTML = '<p>Brak wyników dla zapytania: "<b>' + query + '</b>".</p>';
-        } else {
-            results.forEach(result => {
-                const doc = documentsForLunr.find(d => d.id == result.ref);
-                if (doc) {
-                    const resultItem = document.createElement("div");
-                    resultItem.className = "search-result-item";
-
-                    const titleLink = document.createElement("a");
-                    titleLink.href = "#"; // Nie przeładowujemy strony
-                    titleLink.textContent = doc.title;
-                    titleLink.onclick = (e) => {
-                        e.preventDefault();
-                        document.getElementById("searchResults").classList.remove("visible"); // Ukryj wyniki po kliknięciu
-                        document.getElementById("content").style.display = 'block'; // Pokaż główną zawartość
-                        openDoc(doc.path);
-                    };
-                    resultItem.appendChild(titleLink);
-
-                    // Możesz dodać krótki fragment tekstu z kontekstem
-                    const snippet = doc.text.substring(0, 150) + "..."; // Prosty snippet
-                    const snippetP = document.createElement("p");
-                    snippetP.textContent = snippet;
-                    resultItem.appendChild(snippetP);
-
-                    resultsList.appendChild(resultItem);
-                }
-            });
-        }
-    } catch (e) {
-        resultsList.innerHTML = '<p>Błąd w zapytaniu wyszukiwania. Spróbuj inaczej. (' + e.message + ')</p>';
-        console.error("Lunr search error:", e);
-    }
+if(!q){
+buildTree();
+return;
 }
 
-// Obsługa ukrywania wyników wyszukiwania, gdy pole jest puste
-document.getElementById("search").addEventListener('keyup', (event) => {
-    if (event.key === 'Escape' || event.target.value.trim() === '') {
-        const searchResultsDiv = document.getElementById("searchResults");
-        searchResultsDiv.classList.remove("visible");
-        document.getElementById("content").style.display = 'block';
-    }
+const results=fuse.search(q);
+
+menu.innerHTML="";
+
+results.slice(0,25).forEach(r=>{
+
+const div=document.createElement("div");
+div.className="result";
+
+const t=document.createElement("div");
+t.className="result-title";
+t.textContent=r.item.title;
+
+const s=document.createElement("div");
+s.className="result-snippet";
+
+s.innerHTML=snippet(r.item.text,q).replaceAll(q,"<mark>"+q+"</mark>");
+
+div.appendChild(t);
+div.appendChild(s);
+
+div.onclick=()=>openDoc(r.item);
+
+menu.appendChild(div);
+
 });
+
+}
+
+/* init */
+
+async function init(){
+
+await indexRepo();
+
+fuse=new Fuse(indexCache,{
+keys:["title","text"],
+threshold:0.35,
+ignoreLocation:true
+});
+
+buildTree();
+
+}
+
+init();
 
 </script>
 
 </body>
 </html>
-
