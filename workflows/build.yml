@@ -1,0 +1,26 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: |
+          docker build -t 192.168.0.101:5000/wiki-site:latest .
+
+      - name: Push image
+        run: |
+          docker push 192.168.0.101:5000/wiki-site:latest
+
+      - name: Restart deployment
+        run: |
+          kubectl rollout restart deployment wiki-site
