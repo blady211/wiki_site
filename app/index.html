@@ -8,14 +8,15 @@
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.min.css">
 
 <style>
 
 body{
 margin:0;
-font-family:Inter,system-ui;
-background:linear-gradient(180deg,#020617,#020617,#0f172a);
+font-family:system-ui;
+background:#020617;
 color:#e5e7eb;
 }
 
@@ -23,12 +24,10 @@ color:#e5e7eb;
 height:60px;
 display:flex;
 align-items:center;
-padding:0 28px;
-font-weight:600;
-font-size:18px;
+padding:0 24px;
 background:#020617;
 border-bottom:1px solid #1e293b;
-letter-spacing:.4px;
+font-weight:600;
 }
 
 .layout{
@@ -36,145 +35,171 @@ display:flex;
 height:calc(100vh - 60px);
 }
 
+/* sidebar */
+
 .sidebar{
 width:300px;
-background:rgba(2,6,23,.85);
-backdrop-filter:blur(12px);
 border-right:1px solid #1e293b;
-padding:18px;
-overflow-y:auto;
+display:flex;
+flex-direction:column;
+}
+
+.sidebar-search{
+padding:14px;
+border-bottom:1px solid #1e293b;
 }
 
 #search{
 width:100%;
-padding:10px 12px;
-margin-bottom:16px;
-border-radius:10px;
+padding:10px;
+border-radius:8px;
 border:1px solid #1e293b;
 background:#020617;
-color:#fff;
-font-size:14px;
+color:white;
 }
 
-.tree-folder{
-cursor:pointer;
-color:#94a3b8;
-font-size:13px;
-text-transform:uppercase;
-margin:14px 0 4px;
-display:flex;
-align-items:center;
-gap:6px;
-}
-
-.tree-sub{
-margin-left:12px;
-display:none;
-}
-
-.tree-sub.open{
-display:block;
+.tree{
+overflow:auto;
+flex:1;
+padding:12px;
 }
 
 .tree-file{
 display:block;
-background:none;
-border:none;
-color:#cbd5f5;
-padding:7px 8px;
-cursor:pointer;
-border-radius:6px;
-font-size:14px;
 width:100%;
 text-align:left;
-transition:.15s;
+background:none;
+border:none;
+padding:6px;
+cursor:pointer;
+color:#cbd5f5;
+border-radius:6px;
 }
 
 .tree-file:hover{
-background:rgba(56,189,248,.25);
-transform:translateX(3px);
+background:rgba(56,189,248,.2);
 }
 
-.tree-file.active{
-background:rgba(56,189,248,.35);
-color:#fff;
-}
+/* content */
 
 .content{
 flex:1;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+}
+
+.breadcrumb{
+padding:10px 20px;
+font-size:13px;
+color:#94a3b8;
+border-bottom:1px solid #1e293b;
+}
+
+.doc{
+flex:1;
+overflow:auto;
 padding:40px;
-overflow-y:auto;
 }
 
 .markdown-body{
 background:#020617;
 padding:40px;
-border-radius:14px;
-max-width:950px;
-box-shadow:0 10px 40px rgba(0,0,0,.5);
+border-radius:12px;
+max-width:900px;
+margin:auto;
 }
+
+/* toc */
 
 .toc{
-width:240px;
+width:220px;
 border-left:1px solid #1e293b;
 padding:20px;
-overflow-y:auto;
-background:#020617;
-}
-
-.toc h3{
-margin-top:0;
-font-size:13px;
-color:#94a3b8;
-text-transform:uppercase;
+overflow:auto;
 }
 
 .toc a{
 display:block;
 color:#94a3b8;
-text-decoration:none;
-padding:4px 0;
 font-size:13px;
+text-decoration:none;
+padding:3px 0;
 }
 
 .toc a:hover{
 color:#38bdf8;
 }
 
-::-webkit-scrollbar{
-width:6px;
+/* search results */
+
+.result{
+padding:10px;
+border-bottom:1px solid #1e293b;
+cursor:pointer;
 }
 
-::-webkit-scrollbar-thumb{
+.result-title{
+font-weight:600;
+}
+
+.result-snippet{
+font-size:13px;
+color:#94a3b8;
+}
+
+mark{
+background:#0ea5e9;
+color:white;
+}
+
+/* copy button */
+
+.copy{
+float:right;
+font-size:11px;
 background:#1e293b;
-border-radius:10px;
+padding:3px 6px;
+border-radius:6px;
+cursor:pointer;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<header class="topbar">
+<div class="topbar">
 IT Knowledge Hub
-</header>
+</div>
 
 <div class="layout">
 
 <div class="sidebar">
-<input id="search" placeholder="Search documentation..." oninput="searchDocs()">
-<div id="menu"></div>
+
+<div class="sidebar-search">
+<input id="search" placeholder="Search docs..." oninput="searchDocs()">
+</div>
+
+<div class="tree" id="menu"></div>
+
 </div>
 
 <div class="content">
+
+<div class="breadcrumb" id="breadcrumb">Home</div>
+
+<div class="doc">
 <div id="content" class="markdown-body">
 <h1>IT Knowledge Hub</h1>
-<p>Select a document from the menu.</p>
+<p>Select document.</p>
 </div>
 </div>
 
+</div>
+
 <div class="toc">
-<h3>On this page</h3>
 <div id="toc"></div>
 </div>
 
@@ -183,51 +208,25 @@ IT Knowledge Hub
 <script>
 
 const repo="blady211/wiki_site";
-const folders=["self-learning","interview","projects"];
 
 let indexCache=[];
 let fuse;
 
+/* fetch */
+
 async function safeFetch(url){
 try{
-const res=await fetch(url);
-if(!res.ok) return null;
-return res;
-}catch(e){
+const r=await fetch(url);
+if(!r.ok) return null;
+return r;
+}catch{
 return null;
 }
 }
 
-init();
+/* recursive repo scan */
 
-async function init(){
-
-const menu=document.getElementById("menu");
-menu.innerHTML="";
-
-indexCache=[];
-
-for(const root of folders){
-await buildTree(root,menu);
-}
-
-initSearch();
-
-}
-
-function prettyTitle(name){
-
-return name
-.replace(".md","")
-.replace(/_/g," ")
-.replace(/-/g," ")
-.replace(/\b\w/g,l=>l.toUpperCase())
-.replace(" Ad "," AD ")
-.replace(" Gpo "," GPO ");
-
-}
-
-async function buildTree(path,parent){
+async function indexRepo(path=""){
 
 const url=`https://api.github.com/repos/${repo}/contents/${path}`;
 
@@ -235,30 +234,11 @@ const res=await safeFetch(url);
 if(!res) return;
 
 const items=await res.json();
-if(!Array.isArray(items)) return;
-
-const folderName=path.split("/").pop();
-const folderTitle=prettyTitle(folderName);
-
-const folder=document.createElement("div");
-folder.className="tree-folder";
-folder.innerHTML=`▶ ${folderTitle}`;
-
-const sub=document.createElement("div");
-sub.className="tree-sub";
-
-folder.onclick=()=>{
-const open=sub.classList.toggle("open");
-folder.innerHTML=(open?"▼ ":"▶ ")+folderTitle;
-};
-
-parent.appendChild(folder);
-parent.appendChild(sub);
 
 for(const item of items){
 
 if(item.type==="dir"){
-await buildTree(item.path,sub);
+await indexRepo(item.path);
 continue;
 }
 
@@ -272,41 +252,51 @@ if(!textRes) continue;
 const text=await textRes.text();
 
 indexCache.push({
-title:prettyTitle(item.name),
-path:raw,
+title:item.name.replace(".md",""),
+path:item.path,
+url:raw,
 text
 });
 
-const file=document.createElement("button");
-
-file.className="tree-file";
-file.textContent="• "+prettyTitle(item.name);
-
-file.onclick=()=>{
-
-document.querySelectorAll(".tree-file").forEach(f=>f.classList.remove("active"));
-file.classList.add("active");
-
-openDoc(raw);
-
-};
-
-sub.appendChild(file);
-
 }
 
 }
 
-function openDoc(url){
+/* build sidebar */
 
-const doc=indexCache.find(d=>d.path===url);
-if(!doc) return;
+function buildTree(){
+
+const menu=document.getElementById("menu");
+menu.innerHTML="";
+
+indexCache.forEach(doc=>{
+
+const btn=document.createElement("button");
+btn.className="tree-file";
+btn.textContent=doc.title;
+
+btn.onclick=()=>openDoc(doc);
+
+menu.appendChild(btn);
+
+});
+
+}
+
+/* open doc */
+
+function openDoc(doc){
+
+document.getElementById("breadcrumb").textContent=doc.path;
 
 document.getElementById("content").innerHTML=marked.parse(doc.text);
 
 generateTOC();
+addCopy();
 
 }
+
+/* toc */
 
 function generateTOC(){
 
@@ -317,15 +307,10 @@ const headers=document.querySelectorAll("#content h2,#content h3");
 
 headers.forEach(h=>{
 
-const id=h.textContent
-.toLowerCase()
-.replace(/[^\w\s]/g,"")
-.replace(/\s+/g,"-");
-
+const id=h.textContent.toLowerCase().replace(/\s+/g,"-");
 h.id=id;
 
 const a=document.createElement("a");
-
 a.href="#"+id;
 a.textContent=h.textContent;
 
@@ -335,44 +320,98 @@ toc.appendChild(a);
 
 }
 
-function initSearch(){
+/* copy code */
 
-fuse=new Fuse(indexCache,{
-keys:["title","text"],
-threshold:0.35
+function addCopy(){
+
+document.querySelectorAll("pre code").forEach(block=>{
+
+const btn=document.createElement("span");
+btn.className="copy";
+btn.textContent="copy";
+
+btn.onclick=()=>{
+navigator.clipboard.writeText(block.innerText);
+btn.textContent="copied";
+setTimeout(()=>btn.textContent="copy",1500);
+};
+
+block.parentElement.prepend(btn);
+
 });
 
 }
+
+/* snippet */
+
+function snippet(text,q){
+
+const i=text.toLowerCase().indexOf(q.toLowerCase());
+
+if(i<0) return text.slice(0,120);
+
+return text.slice(Math.max(0,i-50),i+120);
+
+}
+
+/* search */
 
 function searchDocs(){
 
 const q=document.getElementById("search").value.trim();
 
+const menu=document.getElementById("menu");
+
 if(!q){
-init();
+buildTree();
 return;
 }
 
 const results=fuse.search(q);
 
-const menu=document.getElementById("menu");
+menu.innerHTML="";
 
-menu.innerHTML="<div class='tree-folder'>Search Results</div>";
+results.slice(0,25).forEach(r=>{
 
-results.slice(0,20).forEach(r=>{
+const div=document.createElement("div");
+div.className="result";
 
-const btn=document.createElement("button");
+const t=document.createElement("div");
+t.className="result-title";
+t.textContent=r.item.title;
 
-btn.className="tree-file";
-btn.textContent=r.item.title;
+const s=document.createElement("div");
+s.className="result-snippet";
+s.innerHTML=snippet(r.item.text,q).replaceAll(q,"<mark>"+q+"</mark>");
 
-btn.onclick=()=>openDoc(r.item.path);
+div.appendChild(t);
+div.appendChild(s);
 
-menu.appendChild(btn);
+div.onclick=()=>openDoc(r.item);
+
+menu.appendChild(div);
 
 });
 
 }
+
+/* init */
+
+async function init(){
+
+await indexRepo();
+
+fuse=new Fuse(indexCache,{
+keys:["title","text"],
+threshold:0.35,
+ignoreLocation:true
+});
+
+buildTree();
+
+}
+
+init();
 
 </script>
 
