@@ -15,7 +15,7 @@ jobs:
 
       - name: Build image
         run: |
-          docker build -t 192.168.0.101:5000/wiki-site:latest .
+          docker build -t 192.168.0.101:5000/wiki-site:latest ./app
 
       - name: Push image
         run: |
