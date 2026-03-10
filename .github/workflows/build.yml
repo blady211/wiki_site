@@ -6,21 +6,24 @@ on:
       - main
 
 jobs:
+
   build:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
 
-      - name: Build image
-        run: |
-          docker build -t 192.168.0.101:5000/wiki-site:latest ./app
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Push image
-        run: |
-          docker push 192.168.0.101:5000/wiki-site:latest
+    - name: Build image
+      run: |
+        docker build -t 192.168.0.101:5000/wiki-site:${{ github.sha }} ./app
 
-      - name: Restart deployment
-        run: |
-          kubectl rollout restart deployment wiki-site
+    - name: Push image
+      run: |
+        docker push 192.168.0.101:5000/wiki-site:${{ github.sha }}
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl set image deployment/wiki-site \
+        wiki=192.168.0.101:5000/wiki-site:${{ github.sha }}
